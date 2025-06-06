@@ -408,37 +408,26 @@ document.addEventListener('DOMContentLoaded', () => {
         listDiv.style.display = 'block';
       }
 
-      // Show chord type selector when root is selected
+      // Add event listeners for root and chord type selectors
       rootSelect.addEventListener('change', () => {
-        if (rootSelect.value) {
-          chordTypeSelect.classList.add('active');
-          renderList(rootSelect.value, chordTypeSelect.value);
-        } else {
-          chordTypeSelect.classList.remove('active');
-          chordTypeSelect.value = '';
-          renderList();
-        }
+        const selectedRoot = rootSelect.value;
+        const selectedType = chordTypeSelect.value;
+        renderList(selectedRoot, selectedType);
       });
 
-      // Update chord list when chord type changes
       chordTypeSelect.addEventListener('change', () => {
-        if (rootSelect.value) {
-          renderList(rootSelect.value, chordTypeSelect.value);
-        }
+        const selectedRoot = rootSelect.value;
+        const selectedType = chordTypeSelect.value;
+        renderList(selectedRoot, selectedType);
       });
 
-      // Toggle between popular and all chords
+      // Add event listener for Popular Chords button
       popularBtn.addEventListener('click', () => {
-        if (mode === 'all') {
-          mode = 'popular';
-          popularBtn.classList.add('active');
-        } else {
-          mode = 'all';
-          popularBtn.classList.remove('active');
-        }
-        if (rootSelect.value) {
-          renderList(rootSelect.value, chordTypeSelect.value);
-        }
+        mode = mode === 'popular' ? 'all' : 'popular';
+        popularBtn.textContent = mode === 'popular' ? 'Show All Chords' : 'Popular Chords';
+        const selectedRoot = rootSelect.value;
+        const selectedType = chordTypeSelect.value;
+        renderList(selectedRoot, selectedType);
       });
 
       renderChord(selectedChord);
