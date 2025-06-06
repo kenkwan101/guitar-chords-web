@@ -78,17 +78,12 @@ function playChord(positions) {
 
 document.addEventListener('DOMContentLoaded', () => {
   loadSoundfont();
-  fetch('https://kenkwan101.github.io/guitar-chords-web/chords.json')
+  fetch('chords.json')
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      return response.arrayBuffer();
-    })
-    .then(buffer => {
-      // Decompress the gzipped data
-      const decompressed = pako.inflate(new Uint8Array(buffer), { to: 'string' });
-      return JSON.parse(decompressed);
+      return response.json();
     })
     .then(data => {
       const chordNames = Object.keys(data);
