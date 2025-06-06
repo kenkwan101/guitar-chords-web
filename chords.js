@@ -81,7 +81,17 @@ function playChord(positions) {
 document.addEventListener('DOMContentLoaded', () => {
   loadSoundfont();
   fetch('https://kenkwan101.github.io/guitar-chords-web/chords.json')
-    .then(response => response.ok ? response.json() : fetch('/chords.json').then(r => r.json()))
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.arrayBuffer();
+    })
+    .then(buffer => {
+      // Decompress the gzipped data
+      const decompressed = pako.inflate(new Uint8Array(buffer), { to: 'string' });
+      return JSON.parse(decompressed);
+    })
     .then(data => {
       const chordNames = Object.keys(data);
       const searchInput = document.getElementById('chord-search');
@@ -287,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderList();
     })
     .catch(err => {
-      document.getElementById('chords').innerHTML = '<div style="color:red">Failed to load chords.json</div>';
       console.error('Failed to load chords.json', err);
+      document.getElementById('chords').innerHTML = '<div style="color:red">Failed to load chords.json</div>';
     });
 }); 
