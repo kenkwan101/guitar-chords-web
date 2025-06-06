@@ -94,10 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const chordNames = Object.keys(data);
       const listDiv = document.getElementById('chord-list');
       const rootSelect = document.getElementById('root-select');
+      const chordTypeSelect = document.getElementById('chord-type-select');
       const btnPopular = document.getElementById('btn-popular');
       const btnAll = document.getElementById('btn-all');
       let selectedChord = chordNames[0];
-      const MAX_RESULTS = 100;
       let mode = 'all';
       const popularChords = [
         'C', 'D', 'E', 'F', 'G', 'A', 'B',
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chordsDiv.appendChild(container);
       }
 
-      function renderList(root = '') {
+      function renderList(root = '', chordType = '') {
         listDiv.innerHTML = '';
         
         if (!root) {
@@ -230,45 +230,168 @@ document.addEventListener('DOMContentLoaded', () => {
           filtered = filtered.filter(name => popularChords.includes(name));
         }
         filtered = filtered.filter(name => name[0].toUpperCase() === root);
-        
-        const toShow = filtered.slice(0, MAX_RESULTS);
-        const gridContainer = document.createElement('div');
-        gridContainer.style.display = 'grid';
-        gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
-        gridContainer.style.gap = '8px';
-        gridContainer.style.marginTop = '15px';
-        gridContainer.style.padding = '0 10px';
-        
-        toShow.forEach(name => {
-          const chordItem = document.createElement('div');
-          chordItem.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
-          chordItem.textContent = name;
-          chordItem.style.cursor = 'pointer';
-          chordItem.style.padding = '10px';
-          chordItem.style.textAlign = 'center';
-          chordItem.style.background = name === selectedChord ? '#d0e6fa' : '#f4f4f4';
-          chordItem.style.borderRadius = '6px';
-          chordItem.style.transition = 'all 0.2s';
-          chordItem.style.fontSize = '1em';
-          chordItem.onmouseover = () => {
-            if (name !== selectedChord) {
-              chordItem.style.background = '#e0eafc';
-            }
+
+        // Group chords by type with subcategories
+        const chordGroups = {
+          'Basic Chords': {
+            'Major': filtered.filter(name => !name.includes('m') && !name.includes('7') && !name.includes('maj7') && !name.includes('dim') && !name.includes('aug')),
+            'Minor': filtered.filter(name => name.includes('m') && !name.includes('7') && !name.includes('maj7') && !name.includes('dim')),
+            'Diminished': filtered.filter(name => name.includes('dim')),
+            'Augmented': filtered.filter(name => name.includes('aug'))
+          },
+          '7th Chords': {
+            'Dominant 7th': filtered.filter(name => name.includes('7') && !name.includes('maj7') && !name.includes('m7')),
+            'Major 7th': filtered.filter(name => name.includes('maj7')),
+            'Minor 7th': filtered.filter(name => name.includes('m7')),
+            'Diminished 7th': filtered.filter(name => name.includes('dim7'))
+          },
+          'Extended Chords': {
+            '9th': filtered.filter(name => name.includes('9')),
+            '11th': filtered.filter(name => name.includes('11')),
+            '13th': filtered.filter(name => name.includes('13')),
+            '6th': filtered.filter(name => name.includes('6') && !name.includes('m6'))
+          },
+          'Suspended Chords': {
+            'Sus2': filtered.filter(name => name.includes('sus2')),
+            'Sus4': filtered.filter(name => name.includes('sus4'))
+          },
+          'Other': {
+            'Add Chords': filtered.filter(name => name.includes('add')),
+            'Altered': filtered.filter(name => name.includes('alt')),
+            'Miscellaneous': filtered.filter(name => {
+              const isBasic = !name.includes('m') && !name.includes('7') && !name.includes('maj7') && !name.includes('dim') && !name.includes('aug');
+              const isMinor = name.includes('m') && !name.includes('7') && !name.includes('maj7') && !name.includes('dim');
+              const isDim = name.includes('dim');
+              const isAug = name.includes('aug');
+              const is7th = name.includes('7') && !name.includes('maj7') && !name.includes('m7');
+              const isMaj7 = name.includes('maj7');
+              const isMin7 = name.includes('m7');
+              const isDim7 = name.includes('dim7');
+              const is9th = name.includes('9');
+              const is11th = name.includes('11');
+              const is13th = name.includes('13');
+              const is6th = name.includes('6') && !name.includes('m6');
+              const isSus2 = name.includes('sus2');
+              const isSus4 = name.includes('sus4');
+              const isAdd = name.includes('add');
+              const isAlt = name.includes('alt');
+              return !isBasic && !isMinor && !isDim && !isAug && !is7th && !isMaj7 && !isMin7 && !isDim7 && 
+                     !is9th && !is11th && !is13th && !is6th && !isSus2 && !isSus4 && !isAdd && !isAlt;
+            })
+          }
+        };
+
+        // Filter by chord type if selected
+        if (chordType) {
+          const typeMap = {
+            'basic': 'Basic Chords',
+            '7th': '7th Chords',
+            'extended': 'Extended Chords',
+            'suspended': 'Suspended Chords',
+            'other': 'Other'
           };
-          chordItem.onmouseout = () => {
-            if (name !== selectedChord) {
-              chordItem.style.background = '#f4f4f4';
-            }
-          };
-          chordItem.onclick = () => {
-            selectedChord = name;
-            renderChord(name);
-            renderList(rootSelect.value);
-          };
-          gridContainer.appendChild(chordItem);
+          const selectedType = typeMap[chordType];
+          if (selectedType) {
+            const filteredGroups = {};
+            filteredGroups[selectedType] = chordGroups[selectedType];
+            chordGroups = filteredGroups;
+          }
+        }
+
+        // Create container for all groups
+        const allGroupsContainer = document.createElement('div');
+        allGroupsContainer.style.display = 'flex';
+        allGroupsContainer.style.flexDirection = 'column';
+        allGroupsContainer.style.gap = '30px';
+        allGroupsContainer.style.padding = '0 10px';
+
+        // Render each main category
+        Object.entries(chordGroups).forEach(([mainType, subCategories]) => {
+          // Check if any subcategory has chords
+          const hasChords = Object.values(subCategories).some(chords => chords.length > 0);
+          if (!hasChords) return;
+
+          // Create main category container
+          const mainCategoryContainer = document.createElement('div');
+          mainCategoryContainer.style.display = 'flex';
+          mainCategoryContainer.style.flexDirection = 'column';
+          mainCategoryContainer.style.gap = '15px';
+
+          // Add main category header
+          const mainHeader = document.createElement('div');
+          mainHeader.textContent = mainType;
+          mainHeader.style.fontSize = '1.4em';
+          mainHeader.style.fontWeight = 'bold';
+          mainHeader.style.color = '#2c3e50';
+          mainHeader.style.padding = '5px 0';
+          mainHeader.style.borderBottom = '3px solid #2d8cf0';
+          mainCategoryContainer.appendChild(mainHeader);
+
+          // Render each subcategory
+          Object.entries(subCategories).forEach(([subType, chords]) => {
+            if (chords.length === 0) return;
+
+            // Create subcategory container
+            const subCategoryContainer = document.createElement('div');
+            subCategoryContainer.style.display = 'flex';
+            subCategoryContainer.style.flexDirection = 'column';
+            subCategoryContainer.style.gap = '8px';
+            subCategoryContainer.style.marginLeft = '15px';
+
+            // Add subcategory header
+            const subHeader = document.createElement('div');
+            subHeader.textContent = subType;
+            subHeader.style.fontSize = '1.1em';
+            subHeader.style.fontWeight = '500';
+            subHeader.style.color = '#34495e';
+            subHeader.style.padding = '3px 0';
+            subHeader.style.borderBottom = '1px solid #bdc3c7';
+            subCategoryContainer.appendChild(subHeader);
+
+            // Create grid for chords
+            const gridContainer = document.createElement('div');
+            gridContainer.style.display = 'grid';
+            gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+            gridContainer.style.gap = '8px';
+            gridContainer.style.marginTop = '5px';
+            
+            chords.forEach(name => {
+              const chordItem = document.createElement('div');
+              chordItem.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
+              chordItem.textContent = name;
+              chordItem.style.cursor = 'pointer';
+              chordItem.style.padding = '10px';
+              chordItem.style.textAlign = 'center';
+              chordItem.style.background = name === selectedChord ? '#d0e6fa' : '#f4f4f4';
+              chordItem.style.borderRadius = '6px';
+              chordItem.style.transition = 'all 0.2s';
+              chordItem.style.fontSize = '1em';
+              chordItem.onmouseover = () => {
+                if (name !== selectedChord) {
+                  chordItem.style.background = '#e0eafc';
+                }
+              };
+              chordItem.onmouseout = () => {
+                if (name !== selectedChord) {
+                  chordItem.style.background = '#f4f4f4';
+                }
+              };
+              chordItem.onclick = () => {
+                selectedChord = name;
+                renderChord(name);
+                renderList(rootSelect.value, chordTypeSelect.value);
+              };
+              gridContainer.appendChild(chordItem);
+            });
+
+            subCategoryContainer.appendChild(gridContainer);
+            mainCategoryContainer.appendChild(subCategoryContainer);
+          });
+
+          allGroupsContainer.appendChild(mainCategoryContainer);
         });
         
-        listDiv.appendChild(gridContainer);
+        listDiv.appendChild(allGroupsContainer);
         
         if (filtered.length === 0) {
           const msg = document.createElement('div');
@@ -283,22 +406,41 @@ document.addEventListener('DOMContentLoaded', () => {
         listDiv.style.display = 'block';
       }
 
-      rootSelect.addEventListener('change', function() {
-        renderList(this.value);
+      // Show chord type selector when root is selected
+      rootSelect.addEventListener('change', () => {
+        if (rootSelect.value) {
+          chordTypeSelect.classList.add('visible');
+          renderList(rootSelect.value, chordTypeSelect.value);
+        } else {
+          chordTypeSelect.classList.remove('visible');
+          chordTypeSelect.value = '';
+          renderList();
+        }
       });
 
-      btnPopular.addEventListener('click', function() {
+      // Update chord list when chord type changes
+      chordTypeSelect.addEventListener('change', () => {
+        if (rootSelect.value) {
+          renderList(rootSelect.value, chordTypeSelect.value);
+        }
+      });
+
+      popularBtn.addEventListener('click', () => {
         mode = 'popular';
-        btnPopular.style.background = '#d0e6fa';
-        btnAll.style.background = '';
-        renderList(rootSelect.value);
+        popularBtn.classList.add('active');
+        allBtn.classList.remove('active');
+        if (rootSelect.value) {
+          renderList(rootSelect.value, chordTypeSelect.value);
+        }
       });
 
-      btnAll.addEventListener('click', function() {
+      allBtn.addEventListener('click', () => {
         mode = 'all';
-        btnAll.style.background = '#d0e6fa';
-        btnPopular.style.background = '';
-        renderList(rootSelect.value);
+        allBtn.classList.add('active');
+        popularBtn.classList.remove('active');
+        if (rootSelect.value) {
+          renderList(rootSelect.value, chordTypeSelect.value);
+        }
       });
 
       renderChord(selectedChord);
