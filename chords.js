@@ -315,6 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedChord = name;
             renderChord(name);
             renderList(searchInput.value, rootSelect.value);
+            // 選擇和弦後清空搜尋框並隱藏列表
+            searchInput.value = '';
+            listDiv.style.display = 'none';
           };
           listDiv.appendChild(item);
         });
@@ -335,9 +338,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       searchInput.addEventListener('input', function() {
         renderList(this.value, rootSelect.value);
+        // 當輸入搜尋時顯示列表
+        listDiv.style.display = this.value ? 'block' : 'none';
       });
+
+      // 點擊搜尋框時顯示列表
+      searchInput.addEventListener('focus', function() {
+        if (this.value) {
+          listDiv.style.display = 'block';
+        }
+      });
+
+      // 點擊其他地方時隱藏列表
+      document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !listDiv.contains(e.target)) {
+          listDiv.style.display = 'none';
+        }
+      });
+
       rootSelect.addEventListener('change', function() {
         renderList(searchInput.value, this.value);
+        // 當選擇根音時顯示列表
+        listDiv.style.display = 'block';
       });
       btnPopular.addEventListener('click', function() {
         mode = 'popular';

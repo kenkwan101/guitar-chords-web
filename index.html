@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎸</text></svg>">
-  <title>Guitar Chords Web Page</title>
+  <title>吉他和弦網頁</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -281,13 +281,13 @@
 <body>
   <div class="container">
     <div class="language-switch">
-      <button class="lang-btn" onclick="switchLanguage('en')">English</button>
-      <button class="lang-btn" onclick="switchLanguage('zh')">中文</button>
+      <button class="lang-btn" onclick="changeLanguage('zh-TW')">繁體中文</button>
+      <button class="lang-btn" onclick="changeLanguage('en')">English</button>
     </div>
 
-    <h1 id="title">Guitar Chords Explorer</h1>
+    <h1 id="title">吉他和弦查詢</h1>
     <div class="intro" id="intro">
-      Search and explore guitar chords with interactive diagrams and sound playback.
+      歡迎使用吉他和弦查詢工具！輸入和弦名稱即可查看指法圖。
     </div>
 
     <div class="button-group" style="margin-bottom: 30px;">
@@ -322,10 +322,85 @@
     </div>
 
     <div id="chords"></div>
+
+    <div class="button-group">
+      <button data-i18n="createSequence" onclick="window.location.href='song-creator.html'">建立和弦進行</button>
+      <button data-i18n="clear" onclick="clearChords()">清除</button>
+    </div>
+
+    <div class="sequence-controls">
+      <select id="tempo" data-i18n="tempo">
+        <option value="60">60 BPM</option>
+        <option value="80">80 BPM</option>
+        <option value="100">100 BPM</option>
+        <option value="120">120 BPM</option>
+      </select>
+      <button data-i18n="play" onclick="playSequence()">播放</button>
+      <button data-i18n="stop" onclick="stopSequence()">停止</button>
+      <button data-i18n="save" onclick="saveSequence()">儲存</button>
+      <button data-i18n="load" onclick="loadSequence()">載入</button>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/midi.js/0.3.0/midi.min.js"></script>
   <script>
+    const translations = {
+      'zh-TW': {
+        'title': '吉他和弦查詢',
+        'searchPlaceholder': '搜尋和弦...',
+        'intro': '歡迎使用吉他和弦查詢工具！輸入和弦名稱即可查看指法圖。',
+        'play': '播放',
+        'stop': '停止',
+        'createSequence': '建立和弦進行',
+        'clear': '清除',
+        'save': '儲存',
+        'load': '載入',
+        'tempo': '速度',
+        'bpm': 'BPM'
+      },
+      'en': {
+        'title': 'Guitar Chords Web Page',
+        'searchPlaceholder': 'Search for a chord...',
+        'intro': 'Welcome to the Guitar Chords Web Page! Enter a chord name to see its diagram.',
+        'play': 'Play',
+        'stop': 'Stop',
+        'createSequence': 'Create Chord Sequence',
+        'clear': 'Clear',
+        'save': 'Save',
+        'load': 'Load',
+        'tempo': 'Tempo',
+        'bpm': 'BPM'
+      }
+    };
+
+    let currentLang = 'zh-TW';
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      updateTexts();
+    }
+
+    function updateTexts() {
+      const texts = translations[currentLang];
+      document.querySelector('h1').textContent = texts.title;
+      document.querySelector('#chord-search').placeholder = texts.searchPlaceholder;
+      document.querySelector('.intro').textContent = texts.intro;
+      
+      // Update all buttons and other text elements
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (texts[key]) {
+          element.textContent = texts[key];
+        }
+      });
+    }
+
+    // Initialize with default language
+    document.addEventListener('DOMContentLoaded', () => {
+      changeLanguage('zh-TW');
+    });
+
     // 檢查是否成功載入和弦資料
     window.addEventListener('load', async () => {
       try {
