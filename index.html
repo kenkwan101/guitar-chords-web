@@ -5,57 +5,227 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Guitar Chords Web Page</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
-    .container { max-width: 800px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      animation: bgfade 2s ease;
+    }
+    @keyframes bgfade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .container {
+      max-width: 800px;
+      margin: 32px auto;
+      background: rgba(255,255,255,0.95);
+      padding: 24px 16px;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(44,62,80,0.10), 0 1.5px 8px rgba(44,62,80,0.08);
+      transition: box-shadow 0.3s;
+    }
+    .container:hover {
+      box-shadow: 0 12px 40px rgba(44,62,80,0.13), 0 2px 12px rgba(44,62,80,0.10);
+    }
     @media (max-width: 600px) {
       .container {
         margin: 10px;
-        padding: 15px;
+        padding: 10px 2vw;
+        border-radius: 12px;
       }
     }
-    h1 { color: #2c3e50; }
-    .intro { font-size: 1.1em; margin-bottom: 20px; color: #555; }
-    #chord-search { font-size: 1em; padding: 8px 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-    #chord-list { max-height: 200px; overflow-y: auto; background: #f4f4f4; border-radius: 6px; margin-bottom: 24px; border: 1px solid #ccc; }
-    .chord-item { padding: 8px 12px; cursor: pointer; }
-    .chord-item:hover, .chord-item.selected { background: #d0e6fa; }
-    #chords { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-    .chord-diagram { background: #f4f4f4; border-radius: 6px; padding: 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); min-width: 120px; }
-    .chord-name { font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
-    .fretboard { display: grid; grid-template-columns: repeat(6, 20px); grid-template-rows: repeat(5, 20px); gap: 2px; margin-bottom: 10px; }
-    .fret { width: 20px; height: 20px; border: 1px solid #333; background: #fff; }
-    .dot { background: #333; border-radius: 50%; width: 16px; height: 16px; margin: 2px auto; }
+    h1 {
+      color: #2c3e50;
+      font-size: 2.2em;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 8px #e0eafc;
+      font-weight: 700;
+    }
+    .intro {
+      font-size: 1.15em;
+      margin-bottom: 22px;
+      color: #555;
+      text-align: center;
+      background: linear-gradient(90deg, #e0eafc 0%, #cfdef3 100%);
+      border-radius: 8px;
+      padding: 10px 8px;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.04);
+    }
+    #chord-search {
+      font-size: 1.1em;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1.5px solid #b2bec3;
+      border-radius: 6px;
+      transition: border 0.2s;
+      background: #f8fafc;
+      outline: none;
+    }
+    #chord-search:focus {
+      border: 1.5px solid #2d8cf0;
+      background: #eaf6ff;
+    }
+    #chord-list {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #f4f4f4;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      border: 1px solid #ccc;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.04);
+    }
+    .chord-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+      font-size: 1.1em;
+    }
+    .chord-item:hover, .chord-item.selected {
+      background: linear-gradient(90deg, #d0e6fa 0%, #e0eafc 100%);
+      color: #2d8cf0;
+      font-weight: 600;
+    }
+    #chords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+    }
+    .chord-diagram {
+      background: #f4f4f4;
+      border-radius: 14px;
+      padding: 20px 12px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.10);
+      min-width: 120px;
+      transition: box-shadow 0.3s, transform 0.2s;
+      margin-bottom: 10px;
+      margin-top: 10px;
+      animation: fadein 0.7s;
+    }
+    .chord-diagram:hover {
+      box-shadow: 0 4px 24px rgba(44,62,80,0.13);
+      transform: scale(1.03);
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: none; }
+    }
+    .chord-name {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 1.3em;
+      color: #2d8cf0;
+      letter-spacing: 2px;
+      text-shadow: 0 1px 4px #e0eafc;
+    }
+    .fretboard {
+      display: grid;
+      grid-template-columns: repeat(6, 22px);
+      grid-template-rows: repeat(5, 22px);
+      gap: 2px;
+      margin-bottom: 10px;
+      margin-top: 8px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+      justify-content: center;
+    }
+    .fret {
+      width: 22px;
+      height: 22px;
+      border: 1px solid #2d8cf0;
+      background: #fff;
+      border-radius: 4px;
+    }
+    .dot {
+      background: #2d8cf0;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      margin: 2px auto;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1em;
+    }
     .language-switch {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      top: 24px;
+      right: 24px;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+    }
+    .lang-btn {
+      background: linear-gradient(90deg, #2d8cf0 0%, #6dd5fa 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 18px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.10);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .lang-btn:hover, .lang-btn:focus {
+      background: linear-gradient(90deg, #1766b3 0%, #2d8cf0 100%);
+      transform: scale(1.07);
     }
     .button-group {
       display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
+      justify-content: center;
     }
     .button-group button {
-      font-size: 1em;
-      padding: 8px 16px;
+      font-size: 1.1em;
+      padding: 10px 22px;
       border: none;
-      border-radius: 4px;
-      background: #2c3e50;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%);
       color: white;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s, transform 0.2s;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.10);
     }
-    .button-group button:hover {
-      background: #34495e;
+    .button-group button:hover, .button-group button:focus {
+      background: linear-gradient(90deg, #1766b3 0%, #2d8cf0 100%);
+      transform: scale(1.05);
     }
     select {
       width: 100%;
-      padding: 8px;
-      margin-bottom: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: white;
+      padding: 10px;
+      margin-bottom: 14px;
+      border: 1.5px solid #b2bec3;
+      border-radius: 6px;
+      background: #f8fafc;
+      font-size: 1.1em;
+      transition: border 0.2s;
+    }
+    select:focus {
+      border: 1.5px solid #2d8cf0;
+      background: #eaf6ff;
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.3em; }
+      .container { padding: 4vw 2vw; }
+      .chord-diagram { min-width: 90vw; max-width: 98vw; padding: 10px 2vw; }
+      .fretboard { grid-template-columns: repeat(6, 12vw); grid-template-rows: repeat(5, 12vw); }
+      .fret, .dot { width: 10vw; height: 10vw; font-size: 0.9em; }
+      .language-switch { top: 10px; right: 10px; }
     }
   </style>
 </head>
