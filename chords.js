@@ -28,6 +28,9 @@ const translations = {
   }
 };
 
+// 全局變量
+let guitarSoundfont = null;
+
 // Language switching function
 function switchLanguage(lang) {
   document.getElementById('title').textContent = translations[lang].title;
@@ -40,6 +43,74 @@ function switchLanguage(lang) {
   document.getElementById('add-to-sequence').textContent = translations[lang].addToSequence;
   document.getElementById('clear-sequence').textContent = translations[lang].clearSequence;
   document.documentElement.lang = lang;
+}
+
+// 加载吉他音色（nylon）
+function loadSoundfont() {
+  if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
+    guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
+    console.log('[DEBUG] Soundfont loaded from window.MIDI.Soundfont:', guitarSoundfont);
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = 'guitar-sounds/acoustic_guitar_nylon-mp3.js';
+  script.onload = () => {
+    guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
+    console.log('[DEBUG] Soundfont loaded via script:', guitarSoundfont);
+  };
+  script.onerror = () => {
+    console.error('[DEBUG] Failed to load soundfont script!');
+  };
+  document.body.appendChild(script);
+}
+
+// 吉他标准音高（6-1弦）
+const stringNotes = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
+
+// 计算音高
+function getNoteName(stringIdx, fret) {
+  if (fret < 0) return null; // 静音
+  // MIDI音高表
+  const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  // 解析如 E2
+  const open = stringNotes[stringIdx];
+  const note = open.match(/([A-G]#?)(\d)/);
+  let idx = noteOrder.indexOf(note[1]);
+  let octave = parseInt(note[2], 10);
+  idx += fret;
+  while (idx >= 12) { idx -= 12; octave += 1; }
+  return noteOrder[idx] + octave;
+}
+
+// 播放和弦
+function playChord(positions) {
+  console.log('[DEBUG] playChord called, guitarSoundfont:', guitarSoundfont);
+  if (!guitarSoundfont) { 
+    loadSoundfont(); 
+    alert('Guitar sound loading, please try again.'); 
+    return; 
+  }
+  // 扫弦效果，6-1弦依次播放
+  let delay = 0;
+  for (let i = 0; i < 6; i++) {
+    const fret = positions[i];
+    if (fret < 0 || fret > 5) continue; // 只支持0-5品
+    const note = getNoteName(i, fret);
+    const url = guitarSoundfont[note];
+    console.log(`[DEBUG] String ${i+1}, fret ${fret}, note: ${note}, url:`, url);
+    if (!url) continue;
+    setTimeout(() => {
+      try {
+        const audio = new Audio(url);
+        audio.onplay = () => console.log(`[DEBUG] Playing note: ${note}`);
+        audio.onerror = (e) => console.error(`[DEBUG] Audio error for note: ${note}`, e);
+        audio.play();
+      } catch (err) {
+        console.error(`[DEBUG] Exception playing note: ${note}`, err);
+      }
+    }, delay);
+    delay += 120; // 每根弦间隔120ms
+  }
 }
 
 // Load chord data and initialize the application
@@ -88,6 +159,9 @@ async function loadChordData() {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
+  // 預先加載音色
+  loadSoundfont();
+  
   loadChordData()
     .then(data => {
       // data is an object: { "C": [...], "Cm": [...], ... }
@@ -338,70 +412,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Show the first chord by default
       renderChord(selectedChord);
       renderList();
-
-      // 加载吉他音色（nylon）
-      let guitarSoundfont = null;
-      function loadSoundfont() {
-        if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
-          guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
-          console.log('[DEBUG] Soundfont loaded from window.MIDI.Soundfont:', guitarSoundfont);
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = 'guitar-sounds/acoustic_guitar_nylon-mp3.js';
-        script.onload = () => {
-          guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
-          console.log('[DEBUG] Soundfont loaded via script:', guitarSoundfont);
-        };
-        script.onerror = () => {
-          console.error('[DEBUG] Failed to load soundfont script!');
-        };
-        document.body.appendChild(script);
-      }
-      loadSoundfont();
-
-      // 吉他标准音高（6-1弦）
-      const stringNotes = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
-      // 计算音高
-      function getNoteName(stringIdx, fret) {
-        if (fret < 0) return null; // 静音
-        // MIDI音高表
-        const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        // 解析如 E2
-        const open = stringNotes[stringIdx];
-        const note = open.match(/([A-G]#?)(\d)/);
-        let idx = noteOrder.indexOf(note[1]);
-        let octave = parseInt(note[2], 10);
-        idx += fret;
-        while (idx >= 12) { idx -= 12; octave += 1; }
-        return noteOrder[idx] + octave;
-      }
-      // 播放和弦
-      function playChord(positions) {
-        console.log('[DEBUG] playChord called, guitarSoundfont:', guitarSoundfont);
-        if (!guitarSoundfont) { loadSoundfont(); alert('Guitar sound loading, please try again.'); return; }
-        // 扫弦效果，6-1弦依次播放
-        let delay = 0;
-        for (let i = 0; i < 6; i++) {
-          const fret = positions[i];
-          if (fret < 0 || fret > 5) continue; // 只支持0-5品
-          const note = getNoteName(i, fret);
-          const url = guitarSoundfont[note];
-          console.log(`[DEBUG] String ${i+1}, fret ${fret}, note: ${note}, url:`, url);
-          if (!url) continue;
-          setTimeout(() => {
-            try {
-              const audio = new Audio(url);
-              audio.onplay = () => console.log(`[DEBUG] Playing note: ${note}`);
-              audio.onerror = (e) => console.error(`[DEBUG] Audio error for note: ${note}`, e);
-              audio.play();
-            } catch (err) {
-              console.error(`[DEBUG] Exception playing note: ${note}`, err);
-            }
-          }, delay);
-          delay += 120; // 每根弦间隔120ms
-        }
-      }
     })
     .catch(err => {
       document.getElementById('chords').innerHTML = '<div style="color:red">Failed to load chords.json</div>';
