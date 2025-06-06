@@ -27,4 +27,4 @@
 
 ---
 
-如需協助，請聯絡作者或在 Issues 留言。 
+如需協助，請聯絡作者或在 Issues 留言。 # guitar-chords-web
