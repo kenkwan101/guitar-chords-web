@@ -64,7 +64,10 @@ fetch('chords.json')
       playBtn.onmouseover = () => playBtn.style.background = '#1766b3';
       playBtn.onmouseout = () => playBtn.style.background = '#2d8cf0';
       playBtn.onclick = () => playChord(positions);
-      container.appendChild(playBtn);
+      const playButtonContainer = document.createElement('div');
+      playButtonContainer.className = 'play-button-container';
+      playButtonContainer.appendChild(playBtn);
+      container.appendChild(playButtonContainer);
       const fretboard = document.createElement('div');
       fretboard.className = 'fretboard';
       fretboard.style.transform = 'scale(1.5)';
