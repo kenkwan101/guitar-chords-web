@@ -213,13 +213,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function renderList(root = '') {
         listDiv.innerHTML = '';
+        
+        if (!root) {
+          const msg = document.createElement('div');
+          msg.style.color = '#666';
+          msg.style.padding = '20px';
+          msg.style.textAlign = 'center';
+          msg.style.fontSize = '1.1em';
+          msg.textContent = 'Please select a root note to view chords';
+          listDiv.appendChild(msg);
+          return;
+        }
+
         let filtered = chordNames;
         if (mode === 'popular') {
           filtered = filtered.filter(name => popularChords.includes(name));
         }
-        if (root) {
-          filtered = filtered.filter(name => name[0].toUpperCase() === root);
-        }
+        filtered = filtered.filter(name => name[0].toUpperCase() === root);
         
         const toShow = filtered.slice(0, MAX_RESULTS);
         const gridContainer = document.createElement('div');
@@ -260,15 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         listDiv.appendChild(gridContainer);
         
-        if (filtered.length > MAX_RESULTS) {
-          const msg = document.createElement('div');
-          msg.style.color = 'gray';
-          msg.style.padding = '8px';
-          msg.style.textAlign = 'center';
-          msg.style.marginTop = '10px';
-          msg.textContent = translations['en'].tooManyResults;
-          listDiv.appendChild(msg);
-        } else if (filtered.length === 0) {
+        if (filtered.length === 0) {
           const msg = document.createElement('div');
           msg.style.color = 'gray';
           msg.style.padding = '8px';
@@ -289,20 +291,18 @@ document.addEventListener('DOMContentLoaded', () => {
         mode = 'popular';
         btnPopular.style.background = '#d0e6fa';
         btnAll.style.background = '';
-        rootSelect.value = '';
-        renderList();
+        renderList(rootSelect.value);
       });
 
       btnAll.addEventListener('click', function() {
         mode = 'all';
         btnAll.style.background = '#d0e6fa';
         btnPopular.style.background = '';
-        rootSelect.value = '';
-        renderList();
+        renderList(rootSelect.value);
       });
 
       renderChord(selectedChord);
-      renderList();
+      renderList(rootSelect.value);
     })
     .catch(err => {
       console.error('Failed to load chords.json', err);
