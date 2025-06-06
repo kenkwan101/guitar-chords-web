@@ -222,76 +222,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (root) {
           filtered = filtered.filter(name => name[0].toUpperCase() === root);
-          // Create a grid container for root-specific chords
-          const gridContainer = document.createElement('div');
-          gridContainer.style.display = 'grid';
-          gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-          gridContainer.style.gap = '10px';
-          gridContainer.style.marginTop = '20px';
-          
-          filtered.forEach(name => {
-            const chordItem = document.createElement('div');
-            chordItem.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
-            chordItem.textContent = name;
-            chordItem.style.cursor = 'pointer';
-            chordItem.style.padding = '8px';
-            chordItem.style.textAlign = 'center';
-            chordItem.style.background = name === selectedChord ? '#d0e6fa' : '#f4f4f4';
-            chordItem.style.borderRadius = '6px';
-            chordItem.style.transition = 'all 0.2s';
-            chordItem.onmouseover = () => {
-              if (name !== selectedChord) {
-                chordItem.style.background = '#e0eafc';
-              }
-            };
-            chordItem.onmouseout = () => {
-              if (name !== selectedChord) {
-                chordItem.style.background = '#f4f4f4';
-              }
-            };
-            chordItem.onclick = () => {
-              selectedChord = name;
-              renderChord(name);
-              renderList(searchInput.value, rootSelect.value);
-              searchInput.value = '';
-              listDiv.style.display = 'none';
-            };
-            gridContainer.appendChild(chordItem);
-          });
-          
-          listDiv.appendChild(gridContainer);
-          listDiv.style.display = 'block';
-          return;
         }
-        
         filtered = filtered.filter(name => name.toLowerCase().includes(filter.toLowerCase()));
+        
         const toShow = filtered.slice(0, MAX_RESULTS);
+        const gridContainer = document.createElement('div');
+        gridContainer.style.display = 'grid';
+        gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+        gridContainer.style.gap = '10px';
+        gridContainer.style.marginTop = '20px';
+        
         toShow.forEach(name => {
-          const item = document.createElement('div');
-          item.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
-          item.textContent = name;
-          item.onclick = () => {
+          const chordItem = document.createElement('div');
+          chordItem.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
+          chordItem.textContent = name;
+          chordItem.style.cursor = 'pointer';
+          chordItem.style.padding = '8px';
+          chordItem.style.textAlign = 'center';
+          chordItem.style.background = name === selectedChord ? '#d0e6fa' : '#f4f4f4';
+          chordItem.style.borderRadius = '6px';
+          chordItem.style.transition = 'all 0.2s';
+          chordItem.onmouseover = () => {
+            if (name !== selectedChord) {
+              chordItem.style.background = '#e0eafc';
+            }
+          };
+          chordItem.onmouseout = () => {
+            if (name !== selectedChord) {
+              chordItem.style.background = '#f4f4f4';
+            }
+          };
+          chordItem.onclick = () => {
             selectedChord = name;
             renderChord(name);
             renderList(searchInput.value, rootSelect.value);
             searchInput.value = '';
-            listDiv.style.display = 'none';
           };
-          listDiv.appendChild(item);
+          gridContainer.appendChild(chordItem);
         });
+        
+        listDiv.appendChild(gridContainer);
+        
         if (filtered.length > MAX_RESULTS) {
           const msg = document.createElement('div');
           msg.style.color = 'gray';
           msg.style.padding = '8px';
+          msg.style.textAlign = 'center';
+          msg.style.marginTop = '10px';
           msg.textContent = translations['en'].tooManyResults;
           listDiv.appendChild(msg);
         } else if (filtered.length === 0) {
           const msg = document.createElement('div');
           msg.style.color = 'gray';
           msg.style.padding = '8px';
+          msg.style.textAlign = 'center';
+          msg.style.marginTop = '10px';
           msg.textContent = translations['en'].noChordsFound;
           listDiv.appendChild(msg);
         }
+        
         listDiv.style.display = 'block';
       }
 
