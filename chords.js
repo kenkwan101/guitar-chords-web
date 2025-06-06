@@ -4,9 +4,18 @@ const translations = {
     title: "Guitar Chords Explorer",
     intro: "Search and explore guitar chords with interactive diagrams and sound playback.",
     popularChords: "Popular Chords",
+<<<<<<< HEAD
     searchPlaceholder: "Search chords...",
     allRoots: "All Roots",
     selectChord: "Select a chord...",
+=======
+    createSequence: "Create Chord Sequence",
+    searchPlaceholder: "Search chords...",
+    allRoots: "All Roots",
+    selectChord: "Select a chord...",
+    addToSequence: "Add to Sequence",
+    clearSequence: "Clear Sequence",
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
     tooManyResults: "Too many results. Please refine your search.",
     noChordsFound: "No chords found."
   },
@@ -14,6 +23,7 @@ const translations = {
     title: "吉他和弦探索器",
     intro: "搜索和探索吉他和弦，包含交互式图表和声音播放功能。",
     popularChords: "常用和弦",
+<<<<<<< HEAD
     searchPlaceholder: "搜索和弦...",
     allRoots: "所有根音",
     selectChord: "选择一个和弦...",
@@ -27,6 +37,14 @@ const translations = {
     searchPlaceholder: "搜索和弦...",
     allRoots: "所有根音",
     selectChord: "选择一个和弦...",
+=======
+    createSequence: "创建和弦序列",
+    searchPlaceholder: "搜索和弦...",
+    allRoots: "所有根音",
+    selectChord: "选择一个和弦...",
+    addToSequence: "添加到序列",
+    clearSequence: "清除序列",
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
     tooManyResults: "结果太多，请优化搜索条件。",
     noChordsFound: "未找到和弦。"
   }
@@ -40,9 +58,18 @@ function switchLanguage(lang) {
   document.getElementById('title').textContent = translations[lang].title;
   document.getElementById('intro').textContent = translations[lang].intro;
   document.getElementById('btn-popular').textContent = translations[lang].popularChords;
+<<<<<<< HEAD
   document.getElementById('chord-search').placeholder = translations[lang].searchPlaceholder;
   document.getElementById('root-select').options[0].text = translations[lang].allRoots;
   document.getElementById('sequence-chord-select').options[0].text = translations[lang].selectChord;
+=======
+  document.getElementById('btn-create-sequence').textContent = translations[lang].createSequence;
+  document.getElementById('chord-search').placeholder = translations[lang].searchPlaceholder;
+  document.getElementById('root-select').options[0].text = translations[lang].allRoots;
+  document.getElementById('sequence-chord-select').options[0].text = translations[lang].selectChord;
+  document.getElementById('add-to-sequence').textContent = translations[lang].addToSequence;
+  document.getElementById('clear-sequence').textContent = translations[lang].clearSequence;
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
   document.documentElement.lang = lang;
 }
 
@@ -172,9 +199,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const rootSelect = document.getElementById('root-select');
       const btnPopular = document.getElementById('btn-popular');
       const btnAll = document.getElementById('btn-all');
+<<<<<<< HEAD
       let selectedChord = chordNames[0];
       const MAX_RESULTS = 100;
       let mode = 'all'; // 'all' or 'popular'
+=======
+      const btnCreateSequence = document.getElementById('btn-create-sequence');
+      const chordSequenceCreator = document.getElementById('chord-sequence-creator');
+      const sequenceChordSelect = document.getElementById('sequence-chord-select');
+      const addToSequenceBtn = document.getElementById('add-to-sequence');
+      const clearSequenceBtn = document.getElementById('clear-sequence');
+      const sequenceChordsDiv = document.getElementById('sequence-chords');
+      let selectedChord = chordNames[0];
+      const MAX_RESULTS = 100;
+      let mode = 'all'; // 'all' or 'popular'
+      let currentSequence = [];
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
       const popularChords = [
         'C', 'D', 'E', 'F', 'G', 'A', 'B',
         'Am', 'Dm', 'Em',
@@ -319,18 +359,28 @@ document.addEventListener('DOMContentLoaded', () => {
           const msg = document.createElement('div');
           msg.style.color = 'gray';
           msg.style.padding = '8px';
+<<<<<<< HEAD
           const lang = document.documentElement.lang;
           msg.textContent = translations[lang] ? translations[lang].tooManyResults : translations['en'].tooManyResults;
+=======
+          msg.textContent = translations[document.documentElement.lang].tooManyResults;
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
           listDiv.appendChild(msg);
         } else if (filtered.length === 0) {
           const msg = document.createElement('div');
           msg.style.color = 'gray';
           msg.style.padding = '8px';
+<<<<<<< HEAD
           const lang = document.documentElement.lang;
           msg.textContent = translations[lang] ? translations[lang].noChordsFound : translations['en'].noChordsFound;
           listDiv.appendChild(msg);
         }
         listDiv.style.display = 'block';
+=======
+          msg.textContent = translations[document.documentElement.lang].noChordsFound;
+          listDiv.appendChild(msg);
+        }
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
       }
 
       searchInput.addEventListener('input', function() {
@@ -365,7 +415,10 @@ document.addEventListener('DOMContentLoaded', () => {
         rootSelect.value = '';
         searchInput.value = '';
         renderList();
+<<<<<<< HEAD
         rootSelect.dispatchEvent(new Event('change'));
+=======
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
       });
       btnAll.addEventListener('click', function() {
         mode = 'all';
@@ -374,8 +427,65 @@ document.addEventListener('DOMContentLoaded', () => {
         rootSelect.value = '';
         searchInput.value = '';
         renderList();
+<<<<<<< HEAD
         rootSelect.dispatchEvent(new Event('change'));
       });
+=======
+      });
+      btnCreateSequence.addEventListener('click', function() {
+        chordSequenceCreator.style.display = 'block';
+        document.getElementById('chord-search-container').style.display = 'none';
+        document.getElementById('chords').style.display = 'none';
+        btnCreateSequence.style.background = '#d0e6fa';
+        btnPopular.style.background = '';
+      });
+
+      // 初始化和弦選擇下拉框
+      chordNames.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        sequenceChordSelect.appendChild(option);
+      });
+
+      // 添加和弦到序列
+      addToSequenceBtn.addEventListener('click', function() {
+        const selectedChord = sequenceChordSelect.value;
+        if (selectedChord) {
+          currentSequence.push(selectedChord);
+          updateSequenceDisplay();
+        }
+      });
+
+      // 清除序列
+      clearSequenceBtn.addEventListener('click', function() {
+        currentSequence = [];
+        updateSequenceDisplay();
+      });
+
+      // 更新序列顯示
+      function updateSequenceDisplay() {
+        sequenceChordsDiv.innerHTML = '';
+        currentSequence.forEach((chord, index) => {
+          const chordElement = document.createElement('div');
+          chordElement.className = 'sequence-chord';
+          chordElement.innerHTML = `
+            <span>${chord}</span>
+            <button class="remove-chord" data-index="${index}">×</button>
+          `;
+          sequenceChordsDiv.appendChild(chordElement);
+        });
+
+        // 添加刪除按鈕事件
+        document.querySelectorAll('.remove-chord').forEach(button => {
+          button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            currentSequence.splice(index, 1);
+            updateSequenceDisplay();
+          });
+        });
+      }
+>>>>>>> b162bdd051c21fc55fee19aa6479994fa4c34728
 
       // Show the first chord by default
       renderChord(selectedChord);
