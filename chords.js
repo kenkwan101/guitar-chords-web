@@ -1,5 +1,93 @@
-fetch('chords.json')
-  .then(response => response.json())
+// Translations for multilingual support
+const translations = {
+  en: {
+    title: "Guitar Chords Explorer",
+    intro: "Search and explore guitar chords with interactive diagrams and sound playback.",
+    popularChords: "Popular Chords",
+    createSequence: "Create Chord Sequence",
+    searchPlaceholder: "Search chords...",
+    allRoots: "All Roots",
+    selectChord: "Select a chord...",
+    addToSequence: "Add to Sequence",
+    clearSequence: "Clear Sequence",
+    tooManyResults: "Too many results. Please refine your search.",
+    noChordsFound: "No chords found."
+  },
+  zh: {
+    title: "吉他和弦探索器",
+    intro: "搜索和探索吉他和弦，包含交互式图表和声音播放功能。",
+    popularChords: "常用和弦",
+    createSequence: "创建和弦序列",
+    searchPlaceholder: "搜索和弦...",
+    allRoots: "所有根音",
+    selectChord: "选择一个和弦...",
+    addToSequence: "添加到序列",
+    clearSequence: "清除序列",
+    tooManyResults: "结果太多，请优化搜索条件。",
+    noChordsFound: "未找到和弦。"
+  }
+};
+
+// Language switching function
+function switchLanguage(lang) {
+  document.getElementById('title').textContent = translations[lang].title;
+  document.getElementById('intro').textContent = translations[lang].intro;
+  document.getElementById('btn-popular').textContent = translations[lang].popularChords;
+  document.getElementById('btn-create-sequence').textContent = translations[lang].createSequence;
+  document.getElementById('chord-search').placeholder = translations[lang].searchPlaceholder;
+  document.getElementById('root-select').options[0].text = translations[lang].allRoots;
+  document.getElementById('sequence-chord-select').options[0].text = translations[lang].selectChord;
+  document.getElementById('add-to-sequence').textContent = translations[lang].addToSequence;
+  document.getElementById('clear-sequence').textContent = translations[lang].clearSequence;
+  document.documentElement.lang = lang;
+}
+
+// Load chord data and initialize the application
+async function loadChordData() {
+  try {
+    console.log('Attempting to load chord data from GitHub Pages...');
+    const response = await fetch('https://kenkwan101.github.io/guitar-chords-web/chords.json');
+    if (!response.ok) {
+      throw new Error(`GitHub Pages request failed with status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('Successfully loaded chord data from GitHub Pages');
+    return data;
+  } catch (error) {
+    console.error('Error loading chord data from GitHub Pages:', error);
+    // 如果GitHub Pages加載失敗，嘗試從本地文件加載
+    try {
+      console.log('Attempting to load chord data from local file...');
+      const response = await fetch('/chords.json');
+      if (!response.ok) {
+        throw new Error(`Local file request failed with status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Successfully loaded chord data from local file');
+      return data;
+    } catch (fallbackError) {
+      console.error('Error loading fallback chord data:', fallbackError);
+      // 顯示錯誤信息給用戶
+      const errorMessage = document.createElement('div');
+      errorMessage.style.color = 'red';
+      errorMessage.style.padding = '20px';
+      errorMessage.style.textAlign = 'center';
+      errorMessage.style.backgroundColor = '#fff3f3';
+      errorMessage.style.borderRadius = '8px';
+      errorMessage.style.margin = '20px';
+      errorMessage.innerHTML = `
+        <h3>Error Loading Chord Data</h3>
+        <p>Failed to load chord data from both GitHub Pages and local file.</p>
+        <p>Please try refreshing the page or contact support if the problem persists.</p>
+      `;
+      document.body.insertBefore(errorMessage, document.body.firstChild);
+      throw new Error('Failed to load chord data from both GitHub Pages and local file');
+    }
+  }
+}
+
+// Initialize the application
+loadChordData()
   .then(data => {
     // data is an object: { "C": [...], "Cm": [...], ... }
     const chordNames = Object.keys(data);
@@ -8,9 +96,16 @@ fetch('chords.json')
     const rootSelect = document.getElementById('root-select');
     const btnPopular = document.getElementById('btn-popular');
     const btnAll = document.getElementById('btn-all');
+    const btnCreateSequence = document.getElementById('btn-create-sequence');
+    const chordSequenceCreator = document.getElementById('chord-sequence-creator');
+    const sequenceChordSelect = document.getElementById('sequence-chord-select');
+    const addToSequenceBtn = document.getElementById('add-to-sequence');
+    const clearSequenceBtn = document.getElementById('clear-sequence');
+    const sequenceChordsDiv = document.getElementById('sequence-chords');
     let selectedChord = chordNames[0];
     const MAX_RESULTS = 100;
     let mode = 'all'; // 'all' or 'popular'
+    let currentSequence = [];
     const popularChords = [
       'C', 'D', 'E', 'F', 'G', 'A', 'B',
       'Am', 'Dm', 'Em',
@@ -152,13 +247,13 @@ fetch('chords.json')
         const msg = document.createElement('div');
         msg.style.color = 'gray';
         msg.style.padding = '8px';
-        msg.textContent = `Too many results (${filtered.length}). Please refine your search.`;
+        msg.textContent = translations[document.documentElement.lang].tooManyResults;
         listDiv.appendChild(msg);
       } else if (filtered.length === 0) {
         const msg = document.createElement('div');
         msg.style.color = 'gray';
         msg.style.padding = '8px';
-        msg.textContent = 'No chords found.';
+        msg.textContent = translations[document.documentElement.lang].noChordsFound;
         listDiv.appendChild(msg);
       }
     }
@@ -185,6 +280,59 @@ fetch('chords.json')
       searchInput.value = '';
       renderList();
     });
+    btnCreateSequence.addEventListener('click', function() {
+      chordSequenceCreator.style.display = 'block';
+      document.getElementById('chord-search-container').style.display = 'none';
+      document.getElementById('chords').style.display = 'none';
+      btnCreateSequence.style.background = '#d0e6fa';
+      btnPopular.style.background = '';
+    });
+
+    // 初始化和弦選擇下拉框
+    chordNames.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      sequenceChordSelect.appendChild(option);
+    });
+
+    // 添加和弦到序列
+    addToSequenceBtn.addEventListener('click', function() {
+      const selectedChord = sequenceChordSelect.value;
+      if (selectedChord) {
+        currentSequence.push(selectedChord);
+        updateSequenceDisplay();
+      }
+    });
+
+    // 清除序列
+    clearSequenceBtn.addEventListener('click', function() {
+      currentSequence = [];
+      updateSequenceDisplay();
+    });
+
+    // 更新序列顯示
+    function updateSequenceDisplay() {
+      sequenceChordsDiv.innerHTML = '';
+      currentSequence.forEach((chord, index) => {
+        const chordElement = document.createElement('div');
+        chordElement.className = 'sequence-chord';
+        chordElement.innerHTML = `
+          <span>${chord}</span>
+          <button class="remove-chord" data-index="${index}">×</button>
+        `;
+        sequenceChordsDiv.appendChild(chordElement);
+      });
+
+      // 添加刪除按鈕事件
+      document.querySelectorAll('.remove-chord').forEach(button => {
+        button.addEventListener('click', function() {
+          const index = parseInt(this.getAttribute('data-index'));
+          currentSequence.splice(index, 1);
+          updateSequenceDisplay();
+        });
+      });
+    }
 
     // Show the first chord by default
     renderChord(selectedChord);
@@ -195,12 +343,17 @@ fetch('chords.json')
     function loadSoundfont() {
       if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
         guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
+        console.log('[DEBUG] Soundfont loaded from window.MIDI.Soundfont:', guitarSoundfont);
         return;
       }
       const script = document.createElement('script');
       script.src = 'guitar-sounds/acoustic_guitar_nylon-mp3.js';
       script.onload = () => {
         guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
+        console.log('[DEBUG] Soundfont loaded via script:', guitarSoundfont);
+      };
+      script.onerror = () => {
+        console.error('[DEBUG] Failed to load soundfont script!');
       };
       document.body.appendChild(script);
     }
@@ -224,6 +377,7 @@ fetch('chords.json')
     }
     // 播放和弦
     function playChord(positions) {
+      console.log('[DEBUG] playChord called, guitarSoundfont:', guitarSoundfont);
       if (!guitarSoundfont) { loadSoundfont(); alert('Guitar sound loading, please try again.'); return; }
       // 扫弦效果，6-1弦依次播放
       let delay = 0;
@@ -232,10 +386,17 @@ fetch('chords.json')
         if (fret < 0 || fret > 5) continue; // 只支持0-5品
         const note = getNoteName(i, fret);
         const url = guitarSoundfont[note];
+        console.log(`[DEBUG] String ${i+1}, fret ${fret}, note: ${note}, url:`, url);
         if (!url) continue;
         setTimeout(() => {
-          const audio = new Audio(url);
-          audio.play();
+          try {
+            const audio = new Audio(url);
+            audio.onplay = () => console.log(`[DEBUG] Playing note: ${note}`);
+            audio.onerror = (e) => console.error(`[DEBUG] Audio error for note: ${note}`, e);
+            audio.play();
+          } catch (err) {
+            console.error(`[DEBUG] Exception playing note: ${note}`, err);
+          }
         }, delay);
         delay += 120; // 每根弦间隔120ms
       }

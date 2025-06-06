@@ -115,6 +115,10 @@
       box-shadow: 0 4px 24px rgba(44,62,80,0.13);
       transform: scale(1.03);
     }
+    .play-button-container {
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
     @keyframes fadein {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: none; }
@@ -228,73 +232,125 @@
       .fret, .dot { width: 6vw; height: 6vw; font-size: 0.7em; }
       .language-switch { top: 10px; right: 10px; }
     }
+
+    /* Chord Sequence Creator Styles */
+    .sequence-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .sequence-controls select {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .sequence-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .sequence-chord {
+      background: #f4f4f4;
+      padding: 8px 16px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+    }
+
+    .remove-chord {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 1.2em;
+      padding: 0 4px;
+    }
+
+    .remove-chord:hover {
+      color: #c0392b;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="language-switch">
-      <button onclick="switchLanguage('en')" class="lang-btn">EN</button>
-      <button onclick="switchLanguage('zh')" class="lang-btn">中文</button>
+      <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+      <button class="lang-btn" onclick="switchLanguage('zh')">中文</button>
     </div>
-    <img src="logo.jpeg" alt="Ken Guitar Logo" style="display:block;margin:0 auto 24px auto;max-width:220px;">
-    <h1 data-i18n="title">Guitar Chords</h1>
-    <div class="intro" data-i18n="intro">
-      Welcome to the Guitar Chords Web Page!<br>
-      This website is designed to help guitar players of all levels learn and explore various guitar chords. Browse through different chords, see how they are played on the fretboard, and improve your guitar skills with ease!
+
+    <h1 id="title">Guitar Chords Explorer</h1>
+    <div class="intro" id="intro">
+      Search and explore guitar chords with interactive diagrams and sound playback.
     </div>
-    <div class="button-group">
-      <button id="btn-popular" data-i18n="popularChords">Popular Chords</button>
-      <button id="btn-all" data-i18n="allChords">All Chords</button>
+
+    <div class="button-group" style="margin-bottom: 30px;">
+      <button id="btn-popular" style="margin-right: 20px;">Popular Chords</button>
+      <button id="btn-all">All Chords</button>
     </div>
-    <select id="root-select">
-      <option value="" data-i18n="allRoots">All Roots</option>
-      <option value="C">C</option>
-      <option value="D">D</option>
-      <option value="E">E</option>
-      <option value="F">F</option>
-      <option value="G">G</option>
-      <option value="A">A</option>
-      <option value="B">B</option>
-    </select>
-    <input id="chord-search" type="text" data-i18n-placeholder="searchPlaceholder" placeholder="Search for a chord..." autocomplete="off" />
-    <div id="chord-list"></div>
+
+    <div id="chord-search-container">
+      <input type="text" id="chord-search" placeholder="Search chords...">
+      <select id="root-select">
+        <option value="">All Roots</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="C">C</option>
+        <option value="D">D</option>
+        <option value="E">E</option>
+        <option value="F">F</option>
+        <option value="G">G</option>
+      </select>
+      <div id="chord-list"></div>
+    </div>
+
+    <div id="chord-sequence-creator" style="display: none;">
+      <div class="sequence-controls">
+        <select id="sequence-chord-select">
+          <option value="">Select a chord...</option>
+        </select>
+        <button id="add-to-sequence">Add to Sequence</button>
+        <button id="clear-sequence">Clear Sequence</button>
+      </div>
+      <div id="sequence-chords" class="sequence-display"></div>
+    </div>
+
     <div id="chords"></div>
   </div>
-  <script>
-    const translations = {
-      en: {
-        title: "Guitar Chords",
-        intro: "Welcome to the Guitar Chords Web Page!<br>This website is designed to help guitar players of all levels learn and explore various guitar chords. Browse through different chords, see how they are played on the fretboard, and improve your guitar skills with ease!",
-        popularChords: "Popular Chords",
-        allChords: "All Chords",
-        allRoots: "All Roots",
-        searchPlaceholder: "Search for a chord..."
-      },
-      zh: {
-        title: "吉他和弦",
-        intro: "歡迎來到吉他和弦網頁！<br>這個網站旨在幫助各個級別的吉他手學習和探索各種吉他和弦。瀏覽不同的和弦，了解它們在指板上的彈奏方式，輕鬆提升您的吉他技巧！",
-        popularChords: "常用和弦",
-        allChords: "所有和弦",
-        allRoots: "所有根音",
-        searchPlaceholder: "搜索和弦..."
-      }
-    };
 
-    function switchLanguage(lang) {
-      document.querySelectorAll('[data-i18n]').forEach(element => {
-        const key = element.getAttribute('data-i18n');
-        if (translations[lang][key]) {
-          element.innerHTML = translations[lang][key];
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/midi.js/0.3.0/midi.min.js"></script>
+  <script>
+    // 檢查是否成功載入和弦資料
+    window.addEventListener('load', async () => {
+      try {
+        const response = await fetch('https://kenkwan101.github.io/guitar-chords-web/chords.json');
+        if (!response.ok) {
+          throw new Error('Failed to load chord data from GitHub Pages');
         }
-      });
-      document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-        const key = element.getAttribute('data-i18n-placeholder');
-        if (translations[lang][key]) {
-          element.placeholder = translations[lang][key];
-        }
-      });
-      document.documentElement.lang = lang;
-    }
+        console.log('Successfully loaded chord data from GitHub Pages');
+      } catch (error) {
+        console.error('Error loading chord data:', error);
+        const errorMessage = document.createElement('div');
+        errorMessage.style.color = 'red';
+        errorMessage.style.padding = '20px';
+        errorMessage.style.textAlign = 'center';
+        errorMessage.style.backgroundColor = '#fff3f3';
+        errorMessage.style.borderRadius = '8px';
+        errorMessage.style.margin = '20px';
+        errorMessage.innerHTML = `
+          <h3>Error Loading Chord Data</h3>
+          <p>Failed to load chord data from GitHub Pages.</p>
+          <p>Please try refreshing the page or contact support if the problem persists.</p>
+        `;
+        document.body.insertBefore(errorMessage, document.body.firstChild);
+      }
+    });
   </script>
   <script src="chords.js"></script>
 </body>
