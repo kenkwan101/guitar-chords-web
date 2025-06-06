@@ -224,20 +224,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const toShow = filtered.slice(0, MAX_RESULTS);
         const gridContainer = document.createElement('div');
         gridContainer.style.display = 'grid';
-        gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-        gridContainer.style.gap = '10px';
-        gridContainer.style.marginTop = '20px';
+        gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+        gridContainer.style.gap = '8px';
+        gridContainer.style.marginTop = '15px';
+        gridContainer.style.padding = '0 10px';
         
         toShow.forEach(name => {
           const chordItem = document.createElement('div');
           chordItem.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
           chordItem.textContent = name;
           chordItem.style.cursor = 'pointer';
-          chordItem.style.padding = '12px';
+          chordItem.style.padding = '10px';
           chordItem.style.textAlign = 'center';
           chordItem.style.background = name === selectedChord ? '#d0e6fa' : '#f4f4f4';
           chordItem.style.borderRadius = '6px';
           chordItem.style.transition = 'all 0.2s';
+          chordItem.style.fontSize = '1em';
           chordItem.onmouseover = () => {
             if (name !== selectedChord) {
               chordItem.style.background = '#e0eafc';
