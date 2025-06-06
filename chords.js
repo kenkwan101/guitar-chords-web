@@ -96,15 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const rootSelect = document.getElementById('root-select');
       const chordTypeSelect = document.getElementById('chord-type-select');
       const btnPopular = document.getElementById('btn-popular');
-      const btnAll = document.getElementById('btn-all');
-      let selectedChord = chordNames[0];
+      const popularBtn = document.getElementById('popular-btn');
+      let selectedChord = '';
       let mode = 'all';
+
+      // Define popular chords
       const popularChords = [
-        'C', 'D', 'E', 'F', 'G', 'A', 'B',
-        'Am', 'Dm', 'Em',
-        'C7', 'D7', 'E7', 'G7', 'A7',
-        'Cm', 'Dm', 'Em', 'Fm', 'Gm', 'Am', 'Bm',
-        'F#m', 'B7', 'Emaj7', 'Amaj7', 'Dmaj7', 'Gmaj7'
+        'C', 'G', 'D', 'A', 'E', 'F', 'Am', 'Em', 'Dm', 'G7', 'C7', 'D7',
+        'E7', 'A7', 'B7', 'Fmaj7', 'Cmaj7', 'Gmaj7', 'Dmaj7', 'Amaj7',
+        'Emaj7', 'Bmaj7', 'F#maj7', 'C#maj7', 'G#maj7', 'D#maj7', 'A#maj7',
+        'Fm', 'Bm', 'Gm', 'Cm', 'Dm', 'Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m',
+        'D#m', 'A#m', 'F#', 'C#', 'G#', 'D#', 'A#', 'B', 'E', 'A', 'D', 'G'
       ];
 
       function renderChord(name) {
@@ -409,10 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Show chord type selector when root is selected
       rootSelect.addEventListener('change', () => {
         if (rootSelect.value) {
-          chordTypeSelect.classList.add('visible');
+          chordTypeSelect.classList.add('active');
           renderList(rootSelect.value, chordTypeSelect.value);
         } else {
-          chordTypeSelect.classList.remove('visible');
+          chordTypeSelect.classList.remove('active');
           chordTypeSelect.value = '';
           renderList();
         }
@@ -425,19 +427,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
+      // Toggle between popular and all chords
       popularBtn.addEventListener('click', () => {
-        mode = 'popular';
-        popularBtn.classList.add('active');
-        allBtn.classList.remove('active');
-        if (rootSelect.value) {
-          renderList(rootSelect.value, chordTypeSelect.value);
+        if (mode === 'all') {
+          mode = 'popular';
+          popularBtn.classList.add('active');
+        } else {
+          mode = 'all';
+          popularBtn.classList.remove('active');
         }
-      });
-
-      allBtn.addEventListener('click', () => {
-        mode = 'all';
-        allBtn.classList.add('active');
-        popularBtn.classList.remove('active');
         if (rootSelect.value) {
           renderList(rootSelect.value, chordTypeSelect.value);
         }
