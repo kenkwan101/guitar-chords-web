@@ -68,6 +68,30 @@ fetch('chords.json')
       playButtonContainer.className = 'play-button-container';
       playButtonContainer.appendChild(playBtn);
       container.appendChild(playButtonContainer);
+      // Add X for muted strings
+      const xRow = document.createElement('div');
+      xRow.style.display = 'grid';
+      xRow.style.gridTemplateColumns = 'repeat(6, 22px)';
+      xRow.style.justifyContent = 'center';
+      xRow.style.marginBottom = '2px';
+      for (let string = 0; string < 6; string++) {
+        const xCell = document.createElement('div');
+        xCell.style.width = '22px';
+        xCell.style.height = '18px';
+        xCell.style.display = 'flex';
+        xCell.style.alignItems = 'center';
+        xCell.style.justifyContent = 'center';
+        xCell.style.fontWeight = 'bold';
+        xCell.style.color = '#e74c3c';
+        xCell.style.fontSize = '1em';
+        if (positions[string] === -1) {
+          xCell.textContent = 'X';
+        } else {
+          xCell.textContent = '';
+        }
+        xRow.appendChild(xCell);
+      }
+      container.appendChild(xRow);
       const fretboard = document.createElement('div');
       fretboard.className = 'fretboard';
       fretboard.style.transform = 'scale(1.5)';
