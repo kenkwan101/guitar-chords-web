@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guitar Chords Web Page</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
+    .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    h1 { color: #2c3e50; }
+    .intro { font-size: 1.2em; margin-bottom: 30px; color: #555; }
+    #chord-search { font-size: 1em; padding: 6px 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
+    #chord-list { max-height: 200px; overflow-y: auto; background: #f4f4f4; border-radius: 6px; margin-bottom: 24px; border: 1px solid #ccc; }
+    .chord-item { padding: 6px 12px; cursor: pointer; }
+    .chord-item:hover, .chord-item.selected { background: #d0e6fa; }
+    #chords { display: flex; flex-wrap: wrap; gap: 24px; }
+    .chord-diagram { background: #f4f4f4; border-radius: 6px; padding: 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .chord-name { font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
+    .fretboard { display: grid; grid-template-columns: repeat(6, 20px); grid-template-rows: repeat(5, 20px); gap: 2px; margin-bottom: 10px; }
+    .fret { width: 20px; height: 20px; border: 1px solid #333; background: #fff; }
+    .dot { background: #333; border-radius: 50%; width: 16px; height: 16px; margin: 2px auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="logo.jpeg" alt="Ken Guitar Logo" style="display:block;margin:0 auto 24px auto;max-width:220px;">
+    <h1>Guitar Chords</h1>
+    <div class="intro">
+      Welcome to the Guitar Chords Web Page!<br>
+      This website is designed to help guitar players of all levels learn and explore various guitar chords. Browse through different chords, see how they are played on the fretboard, and improve your guitar skills with ease!
+    </div>
+    <div style="margin-bottom:12px;">
+      <button id="btn-popular" style="font-size:1em;padding:6px 16px;margin-right:8px;">Popular Chords</button>
+      <button id="btn-all" style="font-size:1em;padding:6px 16px;">All Chords</button>
+    </div>
+    <select id="root-select" style="font-size:1em;padding:6px 12px;margin-bottom:12px;">
+      <option value="">All Roots</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="E">E</option>
+      <option value="F">F</option>
+      <option value="G">G</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+    </select>
+    <input id="chord-search" type="text" placeholder="Search for a chord..." autocomplete="off" />
+    <div id="chord-list"></div>
+    <div id="chords"></div>
+  </div>
+  <script src="chords.js"></script>
+</body>
+</html> 
