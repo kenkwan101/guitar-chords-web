@@ -4,7 +4,6 @@ const translations = {
     title: "Guitar Chords Explorer",
     intro: "Search and explore guitar chords with interactive diagrams and sound playback.",
     popularChords: "Popular Chords",
-    searchPlaceholder: "Search chords...",
     allRoots: "All Roots",
     selectChord: "Select a chord...",
     tooManyResults: "Too many results. Please refine your search.",
@@ -18,7 +17,6 @@ function switchLanguage(lang) {
   document.getElementById('title').textContent = translations[lang].title;
   document.getElementById('intro').textContent = translations[lang].intro;
   document.getElementById('btn-popular').textContent = translations[lang].popularChords;
-  document.getElementById('chord-search').placeholder = translations[lang].searchPlaceholder;
   document.getElementById('root-select').options[0].text = translations[lang].allRoots;
   document.documentElement.lang = lang;
 }
@@ -94,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(data => {
       const chordNames = Object.keys(data);
-      const searchInput = document.getElementById('chord-search');
       const listDiv = document.getElementById('chord-list');
       const rootSelect = document.getElementById('root-select');
       const btnPopular = document.getElementById('btn-popular');
@@ -214,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chordsDiv.appendChild(container);
       }
 
-      function renderList(filter = '', root = '') {
+      function renderList(root = '') {
         listDiv.innerHTML = '';
         let filtered = chordNames;
         if (mode === 'popular') {
@@ -223,7 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (root) {
           filtered = filtered.filter(name => name[0].toUpperCase() === root);
         }
-        filtered = filtered.filter(name => name.toLowerCase().includes(filter.toLowerCase()));
         
         const toShow = filtered.slice(0, MAX_RESULTS);
         const gridContainer = document.createElement('div');
@@ -237,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
           chordItem.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
           chordItem.textContent = name;
           chordItem.style.cursor = 'pointer';
-          chordItem.style.padding = '8px';
+          chordItem.style.padding = '12px';
           chordItem.style.textAlign = 'center';
           chordItem.style.background = name === selectedChord ? '#d0e6fa' : '#f4f4f4';
           chordItem.style.borderRadius = '6px';
@@ -255,8 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
           chordItem.onclick = () => {
             selectedChord = name;
             renderChord(name);
-            renderList(searchInput.value, rootSelect.value);
-            searchInput.value = '';
+            renderList(rootSelect.value);
           };
           gridContainer.appendChild(chordItem);
         });
@@ -284,45 +279,26 @@ document.addEventListener('DOMContentLoaded', () => {
         listDiv.style.display = 'block';
       }
 
-      searchInput.addEventListener('input', function() {
-        renderList(this.value, rootSelect.value);
-        listDiv.style.display = this.value ? 'block' : 'none';
-      });
-
-      searchInput.addEventListener('focus', function() {
-        if (this.value) {
-          listDiv.style.display = 'block';
-        }
-      });
-
-      document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !listDiv.contains(e.target)) {
-          listDiv.style.display = 'none';
-        }
-      });
-
       rootSelect.addEventListener('change', function() {
-        renderList(searchInput.value, this.value);
-        listDiv.style.display = 'block';
+        renderList(this.value);
       });
+
       btnPopular.addEventListener('click', function() {
         mode = 'popular';
         btnPopular.style.background = '#d0e6fa';
         btnAll.style.background = '';
         rootSelect.value = '';
-        searchInput.value = '';
         renderList();
-        rootSelect.dispatchEvent(new Event('change'));
       });
+
       btnAll.addEventListener('click', function() {
         mode = 'all';
         btnAll.style.background = '#d0e6fa';
         btnPopular.style.background = '';
         rootSelect.value = '';
-        searchInput.value = '';
         renderList();
-        rootSelect.dispatchEvent(new Event('change'));
       });
+
       renderChord(selectedChord);
       renderList();
     })
