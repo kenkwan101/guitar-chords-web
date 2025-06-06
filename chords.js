@@ -21,7 +21,10 @@ fetch('chords.json')
 
     function renderChord(name) {
       const chord = data[name][0];
-      const positions = chord.positions.map(p => p === "x" ? -1 : parseInt(p, 10)); // -1 for mute
+      const positions = chord.positions.map(p => {
+        const num = parseInt(p, 10);
+        return isNaN(num) ? -1 : num;
+      }); // -1 for mute
       const fingerings = chord.fingerings && chord.fingerings[0] ? chord.fingerings[0] : [];
       const chordsDiv = document.getElementById('chords');
       chordsDiv.innerHTML = '';
