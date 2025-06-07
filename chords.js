@@ -1,8 +1,15 @@
 fetch('chords.json')
   .then(response => response.json())
   .then(data => {
+    // Filter out sharp chords from the data
+    const filteredData = {};
+    Object.keys(data).forEach(key => {
+      if (!key.includes('#')) {
+        filteredData[key] = data[key];
+      }
+    });
     // data is an object: { "C": [...], "Cm": [...], ... }
-    const chordNames = Object.keys(data);
+    const chordNames = Object.keys(filteredData);
     const searchInput = document.getElementById('chord-search');
     const listDiv = document.getElementById('chord-list');
     const rootSelect = document.getElementById('root-select');
@@ -45,7 +52,7 @@ fetch('chords.json')
     ];
 
     function renderChord(name) {
-      const chord = data[name][0];
+      const chord = filteredData[name][0];
       const positions = chord.positions.map(p => p === "x" ? -1 : parseInt(p, 10)); // -1 for mute
       const fingerings = chord.fingerings && chord.fingerings[0] ? chord.fingerings[0] : [];
       const chordsDiv = document.getElementById('chords');
@@ -147,7 +154,7 @@ fetch('chords.json')
 
     function renderList(filter = '', root = '', category = '', chordType = '') {
       listDiv.innerHTML = '';
-      let filtered = popularChords;
+      let filtered = popularChords.filter(name => !name.includes('#'));
       
       if (root) {
         filtered = filtered.filter(name => name[0].toUpperCase() === root);
@@ -159,7 +166,7 @@ fetch('chords.json')
 
       if (chordType) {
         filtered = filtered.filter(name => {
-          const chord = data[name][0];
+          const chord = filteredData[name][0];
           if (!chord) return false;
           const positions = chord.positions.map(p => p === "x" ? -1 : parseInt(p, 10));
           return getChordType(name, positions) === chordType;
@@ -251,7 +258,7 @@ fetch('chords.json')
       
       chords.forEach(chordName => {
         setTimeout(() => {
-          const chord = data[chordName][0];
+          const chord = filteredData[chordName][0];
           if (chord) {
             const positions = chord.positions.map(p => p === "x" ? -1 : parseInt(p, 10));
             playChord(positions);
