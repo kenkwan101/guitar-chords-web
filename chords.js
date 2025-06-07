@@ -304,33 +304,52 @@ fetch('chords.json')
       // Guitar string frequencies (from low E to high E)
       const stringFrequencies = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
       
-      // Play each string
+      // Create a master gain node for overall volume control
+      const masterGain = audioContext.createGain();
+      masterGain.gain.setValueAtTime(0.2, audioContext.currentTime); // Lower overall volume
+      masterGain.connect(audioContext.destination);
+      
+      // Play each string with a slight delay for strumming effect
       positions.forEach((fret, stringIndex) => {
         if (fret < 0) return; // Skip muted strings
         
         // Calculate frequency based on fret position
         const frequency = stringFrequencies[stringIndex] * Math.pow(2, fret / 12);
         
-        // Create oscillator
+        // Create oscillator with a more complex waveform
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         
-        // Set up oscillator
-        oscillator.type = 'sine';
+        // Set up oscillator with a more guitar-like waveform
+        oscillator.type = 'triangle'; // More mellow than sine
         oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
         
-        // Set up gain (volume) envelope
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
-        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 1);
+        // Add some detuning for a richer sound
+        const detuneAmount = (Math.random() - 0.5) * 2; // Random detune between -1 and 1 cents
+        oscillator.detune.setValueAtTime(detuneAmount, audioContext.currentTime);
+        
+        // Set up gain (volume) envelope for a more natural pluck sound
+        const now = audioContext.currentTime;
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.5, now + 0.001); // Quick attack
+        gainNode.gain.exponentialRampToValueAtTime(0.3, now + 0.1); // Initial decay
+        gainNode.gain.exponentialRampToValueAtTime(0.1, now + 0.5); // Longer decay
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.5); // Fade out
+        
+        // Add a subtle filter for more natural sound
+        const filter = audioContext.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2000, now); // Cut high frequencies
+        filter.Q.setValueAtTime(1, now);
         
         // Connect nodes
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(masterGain);
         
         // Start and stop the note
         oscillator.start();
-        oscillator.stop(audioContext.currentTime + 1);
+        oscillator.stop(now + 1.5);
       });
     }
   })
