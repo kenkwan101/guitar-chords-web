@@ -40,3 +40,24 @@ const chords = [
     // 7b9 Chords
     'C7b9', 'G7b9', 'D7b9'
 ]; 
+
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the chord list container
+    const chordList = document.getElementById('chord-list');
+    const chordsContainer = document.getElementById('chords');
+    
+    // Add a title for the chord list
+    const title = document.createElement('h2');
+    title.textContent = 'Popular Guitar Chords';
+    title.style.color = '#2c3e50';
+    title.style.marginBottom = '16px';
+    chordList.insertBefore(title, chordList.firstChild);
+
+    // Add a message about the chord list
+    const message = document.createElement('p');
+    message.textContent = 'Click on any chord to see its diagram and play it.';
+    message.style.color = '#666';
+    message.style.marginBottom = '16px';
+    chordList.insertBefore(message, chordList.firstChild);
+}); 
