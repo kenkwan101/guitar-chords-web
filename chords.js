@@ -296,21 +296,29 @@ fetch('chords.json')
     renderChord(selectedChord);
     renderList();
 
-    // 加载吉他音色（nylon）
+    // Load guitar soundfont
     let guitarSoundfont = null;
     function loadSoundfont() {
-      if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
-        guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'guitar-sounds/acoustic_guitar_nylon-mp3.js';
-      script.onload = () => {
-        guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
-      };
-      document.body.appendChild(script);
+      return new Promise((resolve, reject) => {
+        if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
+          guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
+          resolve();
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'guitar-sounds/acoustic_guitar_nylon-mp3.js';
+        script.onload = () => {
+          if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
+            guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
+            resolve();
+          } else {
+            reject(new Error('Failed to load guitar soundfont'));
+          }
+        };
+        script.onerror = () => reject(new Error('Failed to load guitar soundfont script'));
+        document.body.appendChild(script);
+      });
     }
-    loadSoundfont();
 
     // 吉他标准音高（6-1弦）
     const stringNotes = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
@@ -328,22 +336,29 @@ fetch('chords.json')
       while (idx >= 12) { idx -= 12; octave += 1; }
       return noteOrder[idx] + octave;
     }
-    // 播放和弦
-    function playChord(positions) {
-      if (!guitarSoundfont) { loadSoundfont(); alert('Guitar sound loading, please try again.'); return; }
-      // 扫弦效果，6-1弦依次播放
-      let delay = 0;
-      for (let i = 0; i < 6; i++) {
-        const fret = positions[i];
-        if (fret < 0 || fret > 5) continue; // 只支持0-5品
-        const note = getNoteName(i, fret);
-        const url = guitarSoundfont[note];
-        if (!url) continue;
-        setTimeout(() => {
-          const audio = new Audio(url);
-          audio.play();
-        }, delay);
-        delay += 120; // 每根弦间隔120ms
+    // Play chord function
+    async function playChord(positions) {
+      try {
+        if (!guitarSoundfont) {
+          await loadSoundfont();
+        }
+        // Play strings from 6th to 1st
+        let delay = 0;
+        for (let i = 0; i < 6; i++) {
+          const fret = positions[i];
+          if (fret < 0 || fret > 5) continue; // Only support 0-5 frets
+          const note = getNoteName(i, fret);
+          const url = guitarSoundfont[note];
+          if (!url) continue;
+          setTimeout(() => {
+            const audio = new Audio(url);
+            audio.play().catch(err => console.error('Failed to play note:', err));
+          }, delay);
+          delay += 120; // 120ms between strings
+        }
+      } catch (err) {
+        console.error('Error playing chord:', err);
+        alert('Failed to play chord. Please try again.');
       }
     }
   })
