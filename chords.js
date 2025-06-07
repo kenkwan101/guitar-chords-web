@@ -7,6 +7,7 @@ fetch('chords.json')
     const listDiv = document.getElementById('chord-list');
     const rootSelect = document.getElementById('root-select');
     const categorySelect = document.getElementById('category-select');
+    const chordTypeSelect = document.getElementById('chord-type-select');
     const btnPopular = document.getElementById('btn-popular');
     const btnAll = document.getElementById('btn-all');
     let selectedChord = chordNames[0];
@@ -141,7 +142,15 @@ fetch('chords.json')
       return 'major';
     }
 
-    function renderList(filter = '', root = '', category = '') {
+    // Helper function to determine chord type
+    function getChordType(chordName, positions) {
+      if (chordName.endsWith('5')) return 'power';
+      if (positions.some(p => p > 0)) return 'barre';
+      if (chordName.includes('maj7') || chordName.includes('7') || chordName.includes('9')) return 'jazz';
+      return 'open';
+    }
+
+    function renderList(filter = '', root = '', category = '', chordType = '') {
       listDiv.innerHTML = '';
       let filtered = popularChords;
       
@@ -151,6 +160,15 @@ fetch('chords.json')
       
       if (category) {
         filtered = filtered.filter(name => getChordCategory(name) === category);
+      }
+
+      if (chordType) {
+        filtered = filtered.filter(name => {
+          const chord = data[name][0];
+          if (!chord) return false;
+          const positions = chord.positions.map(p => p === "x" ? -1 : parseInt(p, 10));
+          return getChordType(name, positions) === chordType;
+        });
       }
       
       filtered = filtered.filter(name => name.toLowerCase().includes(filter.toLowerCase()));
@@ -188,7 +206,7 @@ fetch('chords.json')
           item.onclick = () => {
             selectedChord = name;
             renderChord(name);
-            renderList(searchInput.value, rootSelect.value, categorySelect.value);
+            renderList(searchInput.value, rootSelect.value, categorySelect.value, chordTypeSelect.value);
           };
           categoryDiv.appendChild(item);
         });
@@ -212,15 +230,19 @@ fetch('chords.json')
     }
 
     searchInput.addEventListener('input', function() {
-      renderList(this.value, rootSelect.value, categorySelect.value);
+      renderList(this.value, rootSelect.value, categorySelect.value, chordTypeSelect.value);
     });
     
     rootSelect.addEventListener('change', function() {
-      renderList(searchInput.value, this.value, categorySelect.value);
+      renderList(searchInput.value, this.value, categorySelect.value, chordTypeSelect.value);
     });
     
     categorySelect.addEventListener('change', function() {
-      renderList(searchInput.value, rootSelect.value, this.value);
+      renderList(searchInput.value, rootSelect.value, this.value, chordTypeSelect.value);
+    });
+
+    chordTypeSelect.addEventListener('change', function() {
+      renderList(searchInput.value, rootSelect.value, categorySelect.value, this.value);
     });
 
     // Remove the popular/all toggle functionality since we're only showing popular chords
