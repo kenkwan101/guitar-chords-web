@@ -28,23 +28,53 @@
       Welcome to the Guitar Chords Web Page!<br>
       This website is designed to help guitar players of all levels learn and explore various guitar chords. Browse through different chords, see how they are played on the fretboard, and improve your guitar skills with ease!
     </div>
-    <div style="margin-bottom:12px;">
-      <button id="btn-popular" style="font-size:1em;padding:6px 16px;margin-right:8px;">Popular Chords</button>
-      <button id="btn-all" style="font-size:1em;padding:6px 16px;">All Chords</button>
+    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+      <select id="root-select" style="font-size:1em;padding:6px 12px;flex:1;">
+        <option value="">All Roots</option>
+        <option value="C">C</option>
+        <option value="D">D</option>
+        <option value="E">E</option>
+        <option value="F">F</option>
+        <option value="G">G</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+      </select>
+      <select id="category-select" style="font-size:1em;padding:6px 12px;flex:1;">
+        <option value="">All Categories</option>
+        <option value="major">Major</option>
+        <option value="minor">Minor</option>
+        <option value="7">7th</option>
+        <option value="maj7">Major 7th</option>
+        <option value="m7">Minor 7th</option>
+        <option value="sus">Suspended</option>
+        <option value="dim">Diminished</option>
+        <option value="aug">Augmented</option>
+        <option value="6">6th</option>
+        <option value="9">9th</option>
+        <option value="add9">Add9</option>
+        <option value="5">Power Chords</option>
+      </select>
     </div>
-    <select id="root-select" style="font-size:1em;padding:6px 12px;margin-bottom:12px;">
-      <option value="">All Roots</option>
-      <option value="C">C</option>
-      <option value="D">D</option>
-      <option value="E">E</option>
-      <option value="F">F</option>
-      <option value="G">G</option>
-      <option value="A">A</option>
-      <option value="B">B</option>
-    </select>
     <input id="chord-search" type="text" placeholder="Search for a chord..." autocomplete="off" />
     <div id="chord-list"></div>
     <div id="chords"></div>
+    <div id="progressions" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #eee;">
+      <h2 style="color: #2c3e50; margin-bottom: 16px;">Common Chord Progressions</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+        <div class="progression-card" style="background: #f4f4f4; padding: 16px; border-radius: 8px; cursor: pointer;" onclick="playProgression(['C', 'G', 'Am', 'F'])">
+          <h3 style="margin: 0 0 8px 0; color: #2c3e50;">I - V - vi - IV</h3>
+          <p style="margin: 0; color: #666;">C - G - Am - F</p>
+        </div>
+        <div class="progression-card" style="background: #f4f4f4; padding: 16px; border-radius: 8px; cursor: pointer;" onclick="playProgression(['Am', 'F', 'C', 'G'])">
+          <h3 style="margin: 0 0 8px 0; color: #2c3e50;">vi - IV - I - V</h3>
+          <p style="margin: 0; color: #666;">Am - F - C - G</p>
+        </div>
+        <div class="progression-card" style="background: #f4f4f4; padding: 16px; border-radius: 8px; cursor: pointer;" onclick="playProgression(['C', 'Am', 'F', 'G'])">
+          <h3 style="margin: 0 0 8px 0; color: #2c3e50;">I - vi - IV - V</h3>
+          <p style="margin: 0; color: #666;">C - Am - F - G</p>
+        </div>
+      </div>
+    </div>
   </div>
   <script src="chords.js"></script>
 </body>

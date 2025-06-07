@@ -6,17 +6,46 @@ fetch('chords.json')
     const searchInput = document.getElementById('chord-search');
     const listDiv = document.getElementById('chord-list');
     const rootSelect = document.getElementById('root-select');
+    const categorySelect = document.getElementById('category-select');
     const btnPopular = document.getElementById('btn-popular');
     const btnAll = document.getElementById('btn-all');
     let selectedChord = chordNames[0];
     const MAX_RESULTS = 100;
-    let mode = 'all'; // 'all' or 'popular'
     const popularChords = [
+      // Major Chords
       'C', 'D', 'E', 'F', 'G', 'A', 'B',
-      'Am', 'Dm', 'Em',
-      'C7', 'D7', 'E7', 'G7', 'A7',
+      'C#', 'D#', 'F#', 'G#', 'A#',
+      // Minor Chords
       'Cm', 'Dm', 'Em', 'Fm', 'Gm', 'Am', 'Bm',
-      'F#m', 'B7', 'Emaj7', 'Amaj7', 'Dmaj7', 'Gmaj7'
+      'C#m', 'D#m', 'F#m', 'G#m', 'A#m',
+      // 7th Chords
+      'C7', 'D7', 'E7', 'F7', 'G7', 'A7', 'B7',
+      'C#7', 'D#7', 'F#7', 'G#7', 'A#7',
+      // Major 7th Chords
+      'Cmaj7', 'Dmaj7', 'Emaj7', 'Fmaj7', 'Gmaj7', 'Amaj7', 'Bmaj7',
+      'C#maj7', 'D#maj7', 'F#maj7', 'G#maj7', 'A#maj7',
+      // Minor 7th Chords
+      'Cm7', 'Dm7', 'Em7', 'Fm7', 'Gm7', 'Am7', 'Bm7',
+      'C#m7', 'D#m7', 'F#m7', 'G#m7', 'A#m7',
+      // Suspended Chords
+      'Csus2', 'Dsus2', 'Esus2', 'Fsus2', 'Gsus2', 'Asus2', 'Bsus2',
+      'Csus4', 'Dsus4', 'Esus4', 'Fsus4', 'Gsus4', 'Asus4', 'Bsus4',
+      // Diminished Chords
+      'Cdim', 'Ddim', 'Edim', 'Fdim', 'Gdim', 'Adim', 'Bdim',
+      // Augmented Chords
+      'Caug', 'Daug', 'Eaug', 'Faug', 'Gaug', 'Aaug', 'Baug',
+      // 6th Chords
+      'C6', 'D6', 'E6', 'F6', 'G6', 'A6', 'B6',
+      // 9th Chords
+      'C9', 'D9', 'E9', 'F9', 'G9', 'A9', 'B9',
+      // Add9 Chords
+      'Cadd9', 'Dadd9', 'Eadd9', 'Fadd9', 'Gadd9', 'Aadd9', 'Badd9',
+      // Power Chords
+      'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
+      // Additional Common Chords
+      'Em7b5', 'Am7b5', 'Dm7b5', 'Gm7b5',
+      'C7b9', 'D7b9', 'E7b9', 'F7b9', 'G7b9', 'A7b9', 'B7b9',
+      'C7#9', 'D7#9', 'E7#9', 'F7#9', 'G7#9', 'A7#9', 'B7#9'
     ];
 
     function renderChord(name) {
@@ -96,28 +125,77 @@ fetch('chords.json')
       chordsDiv.appendChild(container);
     }
 
-    function renderList(filter = '', root = '') {
+    // Helper function to determine chord category
+    function getChordCategory(chordName) {
+      if (chordName.endsWith('maj7')) return 'maj7';
+      if (chordName.endsWith('m7')) return 'm7';
+      if (chordName.endsWith('7')) return '7';
+      if (chordName.endsWith('m')) return 'minor';
+      if (chordName.endsWith('sus2') || chordName.endsWith('sus4')) return 'sus';
+      if (chordName.endsWith('dim')) return 'dim';
+      if (chordName.endsWith('aug')) return 'aug';
+      if (chordName.endsWith('6')) return '6';
+      if (chordName.endsWith('9')) return '9';
+      if (chordName.endsWith('add9')) return 'add9';
+      if (chordName.endsWith('5')) return '5';
+      return 'major';
+    }
+
+    function renderList(filter = '', root = '', category = '') {
       listDiv.innerHTML = '';
-      let filtered = chordNames;
-      if (mode === 'popular') {
-        filtered = filtered.filter(name => popularChords.includes(name));
-      }
+      let filtered = popularChords;
+      
       if (root) {
         filtered = filtered.filter(name => name[0].toUpperCase() === root);
       }
+      
+      if (category) {
+        filtered = filtered.filter(name => getChordCategory(name) === category);
+      }
+      
       filtered = filtered.filter(name => name.toLowerCase().includes(filter.toLowerCase()));
       const toShow = filtered.slice(0, MAX_RESULTS);
+      
+      // Group chords by category
+      const groupedChords = {};
       toShow.forEach(name => {
-        const item = document.createElement('div');
-        item.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
-        item.textContent = name;
-        item.onclick = () => {
-          selectedChord = name;
-          renderChord(name);
-          renderList(searchInput.value, rootSelect.value);
-        };
-        listDiv.appendChild(item);
+        const category = getChordCategory(name);
+        if (!groupedChords[category]) {
+          groupedChords[category] = [];
+        }
+        groupedChords[category].push(name);
       });
+
+      // Render chords by category
+      Object.entries(groupedChords).forEach(([category, chords]) => {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.style.marginBottom = '16px';
+        
+        const categoryTitle = document.createElement('div');
+        categoryTitle.style.fontWeight = 'bold';
+        categoryTitle.style.color = '#2c3e50';
+        categoryTitle.style.marginBottom = '8px';
+        categoryTitle.style.padding = '4px 8px';
+        categoryTitle.style.background = '#f0f0f0';
+        categoryTitle.style.borderRadius = '4px';
+        categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1) + ' Chords';
+        categoryDiv.appendChild(categoryTitle);
+
+        chords.forEach(name => {
+          const item = document.createElement('div');
+          item.className = 'chord-item' + (name === selectedChord ? ' selected' : '');
+          item.textContent = name;
+          item.onclick = () => {
+            selectedChord = name;
+            renderChord(name);
+            renderList(searchInput.value, rootSelect.value, categorySelect.value);
+          };
+          categoryDiv.appendChild(item);
+        });
+
+        listDiv.appendChild(categoryDiv);
+      });
+
       if (filtered.length > MAX_RESULTS) {
         const msg = document.createElement('div');
         msg.style.color = 'gray';
@@ -134,27 +212,46 @@ fetch('chords.json')
     }
 
     searchInput.addEventListener('input', function() {
-      renderList(this.value, rootSelect.value);
+      renderList(this.value, rootSelect.value, categorySelect.value);
     });
+    
     rootSelect.addEventListener('change', function() {
-      renderList(searchInput.value, this.value);
+      renderList(searchInput.value, this.value, categorySelect.value);
     });
-    btnPopular.addEventListener('click', function() {
-      mode = 'popular';
-      btnPopular.style.background = '#d0e6fa';
-      btnAll.style.background = '';
-      rootSelect.value = '';
-      searchInput.value = '';
-      renderList();
+    
+    categorySelect.addEventListener('change', function() {
+      renderList(searchInput.value, rootSelect.value, this.value);
     });
-    btnAll.addEventListener('click', function() {
-      mode = 'all';
-      btnAll.style.background = '#d0e6fa';
-      btnPopular.style.background = '';
-      rootSelect.value = '';
-      searchInput.value = '';
-      renderList();
-    });
+
+    // Remove the popular/all toggle functionality since we're only showing popular chords
+    btnPopular.style.display = 'none';
+    btnAll.style.display = 'none';
+
+    // Chord progression playback
+    function playProgression(chords) {
+      let delay = 0;
+      const chordDelay = 1000; // 1 second between chords
+      
+      chords.forEach(chordName => {
+        setTimeout(() => {
+          const chord = data[chordName][0];
+          if (chord) {
+            const positions = chord.positions.map(p => p === "x" ? -1 : parseInt(p, 10));
+            playChord(positions);
+            // Highlight the chord in the list
+            const items = document.getElementsByClassName('chord-item');
+            Array.from(items).forEach(item => {
+              item.classList.remove('selected');
+              if (item.textContent === chordName) {
+                item.classList.add('selected');
+                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }
+            });
+          }
+        }, delay);
+        delay += chordDelay;
+      });
+    }
 
     // Show the first chord by default
     renderChord(selectedChord);
