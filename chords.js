@@ -146,9 +146,24 @@ fetch('chords.json')
 
     // Helper function to determine chord type
     function getChordType(chordName, positions) {
+      // Check if it's a power chord first
       if (chordName.endsWith('5')) return 'power';
+      
+      // Check if it's a barre chord (any position above fret 0)
       if (positions.some(p => p > 0)) return 'barre';
-      if (chordName.includes('maj7') || chordName.includes('7') || chordName.includes('9')) return 'jazz';
+      
+      // Check if it's a jazz chord (complex chord types)
+      if (chordName.includes('maj7') || 
+          chordName.includes('7') || 
+          chordName.includes('9') || 
+          chordName.includes('11') || 
+          chordName.includes('13') || 
+          chordName.includes('dim') || 
+          chordName.includes('aug')) {
+        return 'jazz';
+      }
+      
+      // Default to open chord
       return 'open';
     }
 
