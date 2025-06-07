@@ -296,70 +296,42 @@ fetch('chords.json')
     renderChord(selectedChord);
     renderList();
 
-    // Load guitar soundfont
-    let guitarSoundfont = null;
-    function loadSoundfont() {
-      return new Promise((resolve, reject) => {
-        if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
-          guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
-          resolve();
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = 'guitar-sounds/acoustic_guitar_nylon-mp3.js';
-        script.onload = () => {
-          if (window.MIDI && window.MIDI.Soundfont && window.MIDI.Soundfont.acoustic_guitar_nylon) {
-            guitarSoundfont = window.MIDI.Soundfont.acoustic_guitar_nylon;
-            resolve();
-          } else {
-            reject(new Error('Failed to load guitar soundfont'));
-          }
-        };
-        script.onerror = () => reject(new Error('Failed to load guitar soundfont script'));
-        document.body.appendChild(script);
-      });
-    }
-
-    // 吉他标准音高（6-1弦）
-    const stringNotes = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
-    // 计算音高
-    function getNoteName(stringIdx, fret) {
-      if (fret < 0) return null; // 静音
-      // MIDI音高表
-      const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-      // 解析如 E2
-      const open = stringNotes[stringIdx];
-      const note = open.match(/([A-G]#?)(\d)/);
-      let idx = noteOrder.indexOf(note[1]);
-      let octave = parseInt(note[2], 10);
-      idx += fret;
-      while (idx >= 12) { idx -= 12; octave += 1; }
-      return noteOrder[idx] + octave;
-    }
     // Play chord function
-    async function playChord(positions) {
-      try {
-        if (!guitarSoundfont) {
-          await loadSoundfont();
-        }
-        // Play strings from 6th to 1st
-        let delay = 0;
-        for (let i = 0; i < 6; i++) {
-          const fret = positions[i];
-          if (fret < 0 || fret > 5) continue; // Only support 0-5 frets
-          const note = getNoteName(i, fret);
-          const url = guitarSoundfont[note];
-          if (!url) continue;
-          setTimeout(() => {
-            const audio = new Audio(url);
-            audio.play().catch(err => console.error('Failed to play note:', err));
-          }, delay);
-          delay += 120; // 120ms between strings
-        }
-      } catch (err) {
-        console.error('Error playing chord:', err);
-        alert('Failed to play chord. Please try again.');
-      }
+    function playChord(positions) {
+      // Create audio context
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Guitar string frequencies (from low E to high E)
+      const stringFrequencies = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
+      
+      // Play each string
+      positions.forEach((fret, stringIndex) => {
+        if (fret < 0) return; // Skip muted strings
+        
+        // Calculate frequency based on fret position
+        const frequency = stringFrequencies[stringIndex] * Math.pow(2, fret / 12);
+        
+        // Create oscillator
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        // Set up oscillator
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        
+        // Set up gain (volume) envelope
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 1);
+        
+        // Connect nodes
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Start and stop the note
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 1);
+      });
     }
   })
   .catch(err => {
