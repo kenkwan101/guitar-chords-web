@@ -15,19 +15,14 @@ fetch('chords.json')
     const popularChords = [
       // Major Chords
       'C', 'D', 'E', 'F', 'G', 'A', 'B',
-      'C#', 'D#', 'F#', 'G#', 'A#',
       // Minor Chords
       'Cm', 'Dm', 'Em', 'Fm', 'Gm', 'Am', 'Bm',
-      'C#m', 'D#m', 'F#m', 'G#m', 'A#m',
       // 7th Chords
       'C7', 'D7', 'E7', 'F7', 'G7', 'A7', 'B7',
-      'C#7', 'D#7', 'F#7', 'G#7', 'A#7',
       // Major 7th Chords
       'Cmaj7', 'Dmaj7', 'Emaj7', 'Fmaj7', 'Gmaj7', 'Amaj7', 'Bmaj7',
-      'C#maj7', 'D#maj7', 'F#maj7', 'G#maj7', 'A#maj7',
       // Minor 7th Chords
       'Cm7', 'Dm7', 'Em7', 'Fm7', 'Gm7', 'Am7', 'Bm7',
-      'C#m7', 'D#m7', 'F#m7', 'G#m7', 'A#m7',
       // Suspended Chords
       'Csus2', 'Dsus2', 'Esus2', 'Fsus2', 'Gsus2', 'Asus2', 'Bsus2',
       'Csus4', 'Dsus4', 'Esus4', 'Fsus4', 'Gsus4', 'Asus4', 'Bsus4',
